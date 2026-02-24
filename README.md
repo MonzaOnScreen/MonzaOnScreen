@@ -25,6 +25,20 @@ Il prototipo include:
 * un’interfaccia semplice e accessibile
 * navigazione pensata per dispositivi web
 
+## Possibile integrazione nel sito del Comune di Monza
+
+Il progetto **Monza On Screen** è pensato come prototipo di servizio digitale integrabile all’interno del sito istituzionale del Comune di Monza o di piattaforme dedicate alla promozione turistica del territorio.
+
+L’integrazione potrebbe prevedere:
+
+* una sezione dedicata al cineturismo nel portale turistico della città
+* una mappa interattiva delle location cinematografiche presenti a Monza e nella Brianza
+* contenuti culturali e informativi sui film girati nel territorio
+* percorsi tematici per visitatori e cittadini
+* collegamenti con eventi culturali, festival e iniziative locali
+
+L’obiettivo è valorizzare il territorio attraverso strumenti digitali che uniscono cultura, turismo e innovazione, contribuendo a rafforzare l’identità culturale della città.
+
 ## Contesto accademico
 
 Questo progetto è stato sviluppato come parte di una tesi universitaria dedicata alla progettazione di esperienze digitali per la valorizzazione culturale del territorio.
