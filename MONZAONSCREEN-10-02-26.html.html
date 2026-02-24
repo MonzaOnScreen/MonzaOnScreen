@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monza On Screen</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Montserrat:wght@600&family=Source+Sans+Pro:wght@400&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+
+<style>
+body{margin:0;font-family:'Source Sans Pro',sans-serif;background:#fdfaf7;color:#1a1a2e;}
+
+h1{
+font-family:'Poppins';
+padding:25px 0;margin:0;
+font-size:3rem;text-align:center;
+background:#154b7c;color:white;
+}
+
+.intro-box{
+max-width:800px;margin:30px auto;padding:25px;
+background:#fff9a8;border-radius:15px;text-align:center;
+}
+
+.paths-buttons{display:flex;justify-content:center;gap:15px;margin-bottom:25px;flex-wrap:wrap;}
+.paths-buttons button{border:none;padding:12px 20px;border-radius:25px;cursor:pointer;color:white;font-family:'Montserrat';}
+.green{background:#4CAF50;}
+.red{background:#E53935;}
+.yellow{background:#FBC02D;color:#333;}
+.blue{background:#03A9F4;}
+.darkgray{background:#424242;}
+
+#map{width:90%;height:550px;margin:0 auto 40px;border-radius:20px;overflow:hidden;}
+
+.film-card{
+width:90%;max-width:900px;margin:25px auto;padding:20px;
+border-radius:20px;background:white;
+box-shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+.film-card h3{
+font-family:'Montserrat';
+cursor:pointer;
+transition:0.2s;
+}
+.film-card h3:hover{
+color:#0674d8;
+text-decoration:underline;
+}
+
+.film-images{display:flex;flex-wrap:wrap;gap:12px;margin:15px 0;}
+.film-images img{width:200px;height:130px;border-radius:15px;object-fit:cover;cursor:pointer;}
+
+.popup-nav{
+display:flex;
+justify-content:center;
+gap:15px;
+margin-top:10px;
+}
+.popup-nav button{
+border:none;
+background:#c76b3c;
+color:white;
+padding:5px 10px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.popup-images{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:8px;
+margin:10px 0;
+}
+
+.popup-images img{
+width:100%;
+height:90px;
+object-fit:cover;
+border-radius:10px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.popup-images img:hover{
+transform:scale(1.05);
+}
+
+/* ===== OTTIMIZZAZIONE MOBILE VELOCE ===== */
+
+@media (max-width:768px){
+
+h1{
+font-size:1.9rem;
+padding:18px 12px;
+}
+
+.intro-box{
+margin:20px 12px;
+padding:18px;
+font-size:0.95rem;
+}
+
+#map{
+width:95%;
+height:380px;
+border-radius:15px;
+}
+
+.paths-buttons{
+gap:8px;
+padding:0 10px;
+}
+
+.paths-buttons button{
+padding:10px 14px;
+font-size:0.85rem;
+border-radius:18px;
+}
+
+.film-card{
+width:94%;
+padding:16px;
+}
+
+.film-card h3{
+font-size:1.2rem;
+}
+
+.film-images{
+flex-direction:column;
+}
+
+.film-images img{
+width:100%;
+height:auto;
+}
+
+.popup-images{
+grid-template-columns:1fr;
+}
+
+.leaflet-popup-content{
+margin:8px;
+font-size:0.9rem;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<h1>Monza On Screen</h1>
+
+<div class="intro-box">
+Questa mappa cinematografica interattiva del territorio di Monza e Brianza nasce come prototipo digitale pensato per valorizzare il patrimonio culturale e cineturistico locale, offrendo un’esperienza coinvolgente per tutti gli appassionati di cinema e cultura.
+</div>
+
+<div class="paths-buttons">
+<button class="green" onclick="filterPath('Sinfonia in verde')">🌳 Sinfonia in verde</button>
+<button class="red" onclick="filterPath('Il sentiero della velocità')">🏎 Il sentiero della velocità</button>
+<button class="yellow" onclick="filterPath('Brianza Crime')">🚓 Brianza Crime</button>
+<button class="blue" onclick="filterPath('Altri film girati in Brianza')">🎬 Altri film girati in Brianza</button>
+<button class="darkgray" onclick="showAllFilms()">🎥 Tutti i film</button>
+</div>
+
+<div id="map"></div>
+<div id="films-container"></div>
+
+<script>
+const map=L.map('map').setView([45.617695,9.291639],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const films = [
+  {
+    title:"Le Roi et la Reine d’Italie",
+    coords:[[45.593555, 9.275028]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/RolQKFC.png",
+      "https://i.imgur.com/w5IcNxh.jpeg"
+    ],
+    scene:"Vengono riprese le scale della Villa Reale di Monza.",
+    plot:"Constant Girel filma il re Umberto I e la regina Margherita d’Italia mentre scendono le scale della Villa Reale di Monza a braccetto, per poi entrare in una carrozza che, poco dopo, parte.",
+    year:"1896",
+    director:"Constant Girel"
+  },
+  {
+    title:"L’ultimo incontro",
+    coords:[[45.580361, 9.273389], [45.618889, 9.281111]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/lRk6Bv3.png",
+      "https://i.imgur.com/711rMfe.png",
+      "https://i.imgur.com/2sU2Ixw.png",
+      "https://i.imgur.com/pAABgn4.png"
+    ],
+    scene:"La piazza dove Lina (Alida Valli), allontanandosi dall’autodromo, si lascia investire da un camion è Largo Giuseppe Mazzini a Monza; l’autodromo dove il capo meccanico Piero (Amedeo Nazzari) riserva un biglietto alla moglie Lina per farla accedere alla corsia dei box è l’Autodromo Nazionale di Monza.",
+    plot:"Dopo aver interrotto una relazione clandestina con un pilota che muore poco dopo, una donna milanese finisce vittima di un ricatto e sceglie di prostituirsi segretamente per non distruggere il suo matrimonio. Scoperta l'apparente infedeltà, il marito la colpisce a morte in un raptus di gelosia, scoprendo solo troppo tardi che quel degradante sacrificio era stato compiuto proprio per amore verso di lui.",
+    year:"1951",
+    director:"Gianni Franciolini"
+  },
+  {
+    title:"Addio alle armi",
+    coords:[[45.601667, 9.280250]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/NKWXzxy.png",
+      "https://i.imgur.com/3rBrmDx.png"
+    ],
+    scene:"L’Ex Ippodromo del Mirabello (ad oggi scomparso) è dove Frederick (Rock Hudson) e Catherine (Jennifer Jones) assistono a una gara.",
+    plot:"Durante la Grande Guerra, il giovane americano Frederic diserta dal fronte italiano per fuggire nella neutrale Svizzera insieme all'amata infermiera Catherine. La loro speranza di una nuova vita si infrange tragicamente quando lei e il neonato muoiono durante il parto, lasciando l'uomo solo nel suo dolore.",
+    year:"1957",
+    director:"Charles Vidor"
+  },
+  {
+    title:"La notte",
+    coords:[[45.617695, 9.291639]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/vCkA7UP.png",
+      "https://i.imgur.com/MOMzO7e.png"
+    ],
+    scene:"Giovanni (Marcello Mastroianni) e Lidia (Jeanne Moreau) camminano nella scena finale all’alba nel Parco di Monza (zona Golf Club).",
+    plot:"Tra il vuoto di una festa aristocratica e la morte di un amico, Giovanni e Lidia consumano la deriva del loro matrimonio in un labirinto di silenzio e alienazione. All'alba, la lettura di una vecchia lettera sancisce il fallimento finale del loro amore, rendendo vano ogni ultimo tentativo di contatto.",
+    year:"1961",
+    director:"Michelangelo Antonioni"
+  },
+  {
+    title:"Il posto",
+    coords:[[45.662306, 9.158583], [45.661277, 9.155139]],
+    path:"Altri film girati in Brianza",
+    color:"blue",
+    images:[
+      "https://i.imgur.com/ttrDoQt.png",
+      "https://i.imgur.com/b1rLz9Q.png", 
+      "https://i.imgur.com/neaF6Ai.jpeg",
+      "https://i.imgur.com/1JldXcA.png"
+    ],
+    scene:"La stazione dalla quale ogni mattina Domenico (Sandro Panseri) prende il treno per Milano, dove lavora, è la stazione di Meda (MB), in Piazza Stazione. Per andare in stazione, Domenico passa anche davanti alla Chiesa di Santa Maria Nascente, in piazza della Chiesa.",
+    plot:"Domenico cerca il riscatto sociale attraverso un \"posto fisso\" in una grande azienda milanese, dove conosce la giovane Antonietta prima che i ritmi aziendali li separino. Ottenuta finalmente la scrivania desiderata, il ragazzo comprende con amarezza che lo attende una vita grigia e alienante, identica a quella del collega appena defunto.",
+    year:"1961",
+    director:"Ermanno Olmi"
+  },
+  {
+    title:"Il disordine",
+    coords:[[45.628525, 9.320136]],
+    path:"Altri film girati in Brianza",
+    color:"blue",
+    images:[
+      "https://i.imgur.com/UoKjrdn.png",
+      "https://i.imgur.com/jxtpoUi.png"
+    ],
+    scene:"La villa di Alida Valli e famiglia in cui si svolge la prima mezz’ora del film è Villa Borromeo d'Adda di Arcore (MB).",
+    plot:"Mario, un giovane in difficoltà che cerca di aiutare la madre malata, attraversa una Milano popolata da una borghesia cinica e tormentata, incontrando ex amici arricchiti e coppie in piena crisi esistenziale. Il suo percorso si intreccia con quello di Don Giuseppe, un prete fuori dagli schemi che, nonostante i contrasti iniziali, decide di vendere la propria casa per donare il ricavato alla famiglia del ragazzo.",
+    year:"1962",
+    director:"Franco Brusati"
+  },
+  {
+    title:"Grand prix",
+    coords:[[45.624889, 9.289444]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/hV5kIHK.png",
+      "https://i.imgur.com/MGINvmy.png"
+    ],
+    scene:"Il circuito dove Jean-Pierre Sarti (Yves Montand) finirà fuori con la sua Ferrari perdendo la vita è, come detto nel film, l’Autodromo Nazionale di Monza. La macchina di Sarti atterra lungo il rettilineo che le macchine percorrono dopo “la curva del serraglio”, attualmente ancora in uso per le gare di automobilismo all’interno dell’Autodromo.",
+    plot:"Dopo il licenziamento per un incidente a Monaco, il pilota Pete Aron cerca il riscatto mondiale guidando per la debuttante scuderia giapponese Yamura. La sua vittoria finale a Monza viene però oscurata dalla tragedia, culminando in un titolo conquistato tra l'amarezza per la morte del rivale e il ritiro delle altre vetture.",
+    year:"1966",
+    director:"John Frankenheimer"
+  },
+  {
+    title:"Amanti",
+    coords:[[45.619139, 9.281139]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/WVpBPi8.png",
+      "https://i.imgur.com/hbE9R3h.png"
+    ],
+    scene:"L’autodromo dove l’ingegnere Valerio (Marcello Mastroianni) testa le auto da corsa e dove si rivedrà con Julia (Faye Dunaway) è l’Autodromo Nazionale di Monza.",
+    plot:"Colpita da un male incurabile, l'americana Julia rintraccia in Italia l'ingegnere Valerio per vivere con lui un ultimo, travolgente amore in una baita a Cortina. Nonostante il segreto iniziale della malattia, l'uomo sceglie di restarle accanto con dedizione totale, accompagnandola con tenerezza verso la fine.",
+    year:"1968",
+    director:"Vittorio De Sica"
+  },
+  {
+    title:"Il giardino dei Finzi Contini",
+    coords:[[45.612861, 9.276000]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/HN3Ae1C.png",
+      "https://i.imgur.com/4naq1nz.png"
+    ],
+    scene:"La villa dei Finzi-Contini è Villa Litta Bolognini Modignani a Vedano al Lambro (MB) con l'ingresso (o uno di essi) in Piazza Marco Bonfanti. Il complesso si trova all'interno del Parco di Monza a poche centinaia di metri dall'autodromo.",
+    plot:"Sullo sfondo delle leggi razziali a Ferrara, il giovane Giorgio vive l'illusione di un amore impossibile per l'enigmatica Micòl all'interno del rifugio dorato del giardino dei Finzi Contini. La loro vicenda personale viene però spezzata dall'orrore della Storia, culminando nella deportazione della famiglia e nella fine definitiva di ogni speranza giovanile.",
+    year:"1970",
+    director:"Vittorio De Sica"
+  },
+  {
+    title:"I due della Formula 1 alla corsa più pazza, pazza del mondo",
+    coords:[[45.619250, 9.281444]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/119q0p0.png",
+      "https://i.imgur.com/pyFG9XH.png"
+    ],
+    scene:"La pista dove si svolge la gara di Formula 1 è, come dicono nel film, l’Autodromo Nazionale di Monza.",
+    plot:"Franco e Ciccio sono due maldestri meccanici che, dopo aver salvato un industriale dal suicidio, decidono di sostituire il suo pilota rapito con Franco, sfruttando l'incredibile somiglianza tra i due. Grazie a un chip truccato ideato da Ciccio, Franco vince la gara sbaragliando la scuderia rivale responsabile del sequestro, ottenendo come premio il denaro necessario per aprire il negozio di elettrodomestici dei loro sogni.",
+    year:"1971",
+    director:"Osvaldo Civirani"
+  },
+  {
+    title:"Tony Arzenta (Big Guns)",
+    coords:[[45.609944, 9.277361], [45.577028, 9.410361]],
+    path:"Brianza Crime",
+    color:"yellow",
+    images:[
+      "https://i.imgur.com/VxajTfG.png",
+      "https://i.imgur.com/W5YaK05.png",
+      "https://i.imgur.com/PAMDkwc.png",
+      "https://i.imgur.com/KB47PmN.png"
+    ],
+    scene:"Tony (Alain Delon) bracca i sicari che volevano ucciderlo e l'azione si sposta attraverso la Porta di Vedano, uno degli ingressi del Parco di Monza, in Via Enzo Ferrari; la chiesetta dove giungono Tony e Domenico (Marc Porel) inseguendo i due killer che avevano tentato di colpire Tony si trova a Cavenago Brianza (MB), ed è la Chiesa di Santa Maria in Campo.",
+    plot:"Tony Arzenta, un killer professionista che lavora per un'organizzazione criminale internazionale, decide di ritirarsi per dedicarsi alla propria famiglia. Per impedirgli di parlare, i suoi capi piazzano un'autobomba che però uccide accidentalmente sua moglie e suo figlio al posto suo. Distrutto dal dolore, Tony intraprende una spietata e sanguinosa vendetta contro l'intera organizzazione, eliminando a uno a uno i responsabili del massacro.",
+    year:"1973",
+    director:"Duccio Testari"
+  },
+  {
+    title:"Il padrone e l’operaio",
+    coords:[[45.626806, 9.321500], [45.628472, 9.319722]],
+    path:"Altri film girati in Brianza",
+    color:"blue",
+    images:[
+      "https://i.imgur.com/lvtLlge.png",
+      "https://i.imgur.com/qfc9KJv.png", 
+      "https://i.imgur.com/z5Twtur.png",
+      "https://i.imgur.com/jJx0MAs.png"
+    ],
+    scene:"La villa della famiglia Tosi è in realtà Villa Borromeo d'Adda, ad Arcore. Vediamo la scena di ingresso alla Villa, situato in Largo Vincenzo Vela e la ripresa della Villa per intero.",
+    plot:"Il dirigente industriale Giangi Tosi entra in crisi d’identità ossessionato dalle doti da seduttore del suo operaio Luigi, fallendo groffamente in ogni tentativo di umiliarlo o emularlo. Quando persino sua moglie cade vittima del fascino del dipendente, Giangi crolla definitivamente, scegliendo il ricovero in clinica psichiatrica per sfuggire al proprio senso di inadeguatezza.",
+    year:"1975",
+    director:"Steno (Stefano Vanzina)"
+  },
+  {
+    title:"Perché si uccidono (La Merde)",
+    coords:[[45.622195, 9.281639]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/yQlHim1.jpeg",
+      "https://i.imgur.com/z5InYxD.png"
+    ],
+    scene:"L’autodromo nel quale Luca (Maurice Ronet) e Andrea Viotti (Marco Reims) si sfidano nelle scene iniziali è l’Autodromo Nazionale di Monza.",
+    plot:"Andrea, un giovane borghese in rivolta contro il proprio mondo, sprofonda in una spirale di tossicodipendenza e violenza che lo porta a uccidere la donna amata dal suo mentore Luca. Distrutto dal senso di colpa e incapace di trovare redenzione nonostante i tentativi di aiuto dell'amico, il ragazzo sceglie infine il suicidio gettandosi in un burrone.",
+    year:"1976",
+    director:"Mauro Macario"
+  },
+  {
+    title:"E tanta paura",
+    coords:[[45.628472, 9.319861]],
+    path:"Brianza Crime",
+    color:"yellow",
+    images:[
+      "https://i.imgur.com/2rYoCix.png",
+      "https://i.imgur.com/GwtnvXw.png"
+    ],
+    scene:"La Villa Hoffmann (ovvero la villa con le belve in gabbia, al centro dei flashback con John Steiner) è in realtà Villa Borromeo d’Adda ad Arcore (non sul Lago di Como, come il film vuole far credere).",
+    plot:"L'ispettore Lomenzo indaga su una serie di omicidi che colpiscono un gruppo di facoltosi corrotti, accomunati da inquietanti illustrazioni lasciate sui cadaveri e da un torbido passato criminale. Le ricerche svelano infine una vendetta pianificata da un misterioso mandante, deciso a sterminare sistematicamente tutti i responsabili di un delitto rimasto impunito per anni.",
+    year:"1976",
+    director:"Paolo Cavara"
+  },
+  {
+    title:"Milano… difendersi o morire?",
+    coords:[[45.628417, 9.320250]],
+    path:"Brianza Crime",
+    color:"yellow",
+    images:[
+      "https://i.imgur.com/I6JOlgF.png",
+      "https://i.imgur.com/lo0vH6C.png"
+    ],
+    scene:"La residenza di don Ciccio (Guido Leontini) è Villa Borromeo d'Adda ad Arcore (MB).",
+    plot:"Il giovane Pino Scalise, trasferitosi a Milano dopo il carcere, scopre che la cugina è vittima di un racket della prostituzione e si ritrova costretto a contrabbandare droga per conto del boss Don Ciccio. Sotto la sorveglianza del commissario Morani, il ragazzo decide infine di collaborare con la giustizia, permettendo alla polizia di intercettare il carico e smantellare l'organizzazione criminale.",
+    year:"1978",
+    director:"Gianni Martucci"
+  },
+  {
+    title:"Mani di velluto",
+    coords:[[45.593229, 9.272940]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/y61afQs.png",
+      "https://i.imgur.com/zL4lTAa.png"
+    ],
+    scene:"La piazza in cui Guido (Adriano Celentano) cade con la Vespa in una fontana è stata girata presso l'Avancorte (la parte che precede la Corte d'Onore) della Villa Reale di Monza.",
+    plot:"L'inventore milanese Guido Quiller si finge un ladro per conquistare la borseggiatrice Tilli, organizzando furti fittizi in cui rimborsa segretamente tutte le sue vittime. Quando l'equivoco viene svelato, l'uomo abbandona la sua vita privilegiata e vende la propria fabbrica per unirsi definitivamente alla ragazza in un ultimo, simbolico colpo.",
+    year:"1979",
+    director:"Franco Castellano e Giuseppe Moccia (Pipolo)"
+  },
+  {
+    title:"Sbirro… la tua legge è lenta... la mia… no!",
+    coords:[[45.626806, 9.321500]],
+    path:"Brianza Crime",
+    color:"yellow",
+    images:[
+      "https://i.imgur.com/xFfBYI6.png",
+      "https://i.imgur.com/lMoZBFk.png"
+    ],
+    scene:"La villa nel cui piazzale c'è lo scontro a fuoco in cui muore Eva Stefani (Matilde Tisano) è la Villa Borromeo d'Adda di Arcore.",
+    plot:"Il commissario dell'Interpol Paolo Ferro indaga su una serie di delitti finanziari che lo portano a scontrarsi con l'ex camorrista Acampora e a subire il tentato omicidio da parte del nipote tossicodipendente. Nonostante riesca a smascherare il mandante, l'assenza di testimoni impedisce una condanna legale, lasciando che sia la giustizia sommaria della mafia a eliminare definitivamente il criminale.",
+    year:"1979",
+    director:"Stelvio Massi"
+  },
+  {
+    title:"Asso",
+    coords:[[45.603861, 9.278944], [45.593248, 9.272876]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/sDsDaEE.jpeg",
+      "https://i.imgur.com/7xjDw1l.png", 
+      "https://i.imgur.com/VeifzzC.jpeg",
+      "https://i.imgur.com/uCeOWGk.png"
+    ],
+    scene:"L'incontro tra Asso (Adriano Celentano) ed Enrichetta (Sylva Koscina) si svolge nell'ormai scomparso Ippodromo di Monza. Nel controcampo con Asso si intravede chiaramente Villa Mirabello. L'inseguimento di Bretella (Renato Salvatori) e del banchiere Morgan (Pippo Santonastaso) termina davanti alla Villa Reale di Monza (Avancorte).",
+    plot:"Il leggendario giocatore d'azzardo Asso viene ucciso dopo una vittoria storica, tornando come fantasma per proteggere la moglie Silvia e smascherare il barista Bretella come mandante dell'omicidio. Dopo averle assicurato un futuro accanto a un sosia e aver sventato i piani del criminale, lo spirito di Asso può finalmente salire in paradiso per la sfida suprema a poker con Dio.",
+    year:"1981",
+    director:"Franco Castellano e Giuseppe Moccia (Pipolo)"
+  },
+  {
+    title:"Domani si balla!",
+    coords:[[45.628528, 9.320056]],
+    path:"Altri film girati in Brianza",
+    color:"blue",
+    images:[
+      "https://i.imgur.com/DbcPVXb.jpeg",
+      "https://i.imgur.com/zDplW2u.jpeg"
+    ],
+    scene:"L'ospizio per vecchi attori \"Lazzi e strapazzi\" dove Maurizio Nichetti e Mariangela Melato vanno per un servizio e davanti al quale precipiterà l'elicottero di Etere tv, la tv concorrente, è Villa Borromeo D'Adda (Arcore).",
+    plot:"Maurizio e Mariangela, dipendenti di una piccola TV, scoprono che un misterioso segnale alieno scatena una danza irrefrenabile capace di abbattere paure e inibizioni sociali. Nonostante i tentativi della concorrenza di soffocare il fenomeno, i due riescono a fuggire dai loro oppressori per continuare il ballo liberatorio su un cumulo di rifiuti, contagiando l'intera società con la loro ritrovata libertà.",
+    year:"1982",
+    director:"Maurizio Nichetti"
+  },
+  {
+    title:"Lui è peggio di me",
+    coords:[[45.604861, 9.284389]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/LEgpOx7.jpeg",
+      "https://i.imgur.com/EvFn8Vh.png"
+    ],
+    scene:"Il casale con scuderie dove vive Giovanna (Kelly Van der Velden) e dove i protagonisti spesso si ritrovano è in realtà una parte di Villa Mirabellino, nel parco di Monza.",
+    plot:"Luciano tenta in ogni modo di sabotare il matrimonio dell'amico Leonardo con la bella Giovanna, agendo per gelosia e timore di restare solo nella loro vita da scapoli. Dopo aver fallito ogni inganno e causato persino un incendio, Luciano inscena la propria morte per mettere alla prova l'affetto della coppia, concludendo la vicenda in una riconciliazione goliardica.",
+    year:"1985",
+    director:"Enrico Oldoni"
+  },
+  {
+    title:"Frankenstein oltre le frontiere del tempo",
+    coords:[[45.597050, 9.275679]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/2UL79h3.jpeg",
+      "https://i.imgur.com/cGovf7m.jpeg"
+    ],
+    scene:"La chiesetta abbandonata nella quale il dottor il dottor Victor Frankenstein (Raúl Juliá) ha installato il laboratorio dove creerà la creatura (Nick Brimble) è la Torretta Viscontea dei Giardini della Villa Reale di Monza (MB).",
+    plot:"In una Los Angeles distopica, lo scienziato Buchanan viene catapultato nel passato dove incontra Victor Frankenstein e una giovane Mary Shelley, diventando l'involontario ispiratore del celebre romanzo. La vicenda si chiude con un tragico paradosso temporale: lo scienziato scopre che le sue invenzioni tecnologiche hanno infine causato la distruzione totale del mondo nel futuro post-atomico da cui proveniva.",
+    year:"1990",
+    director:"Roger Corman"
+  },
+  {
+    title:"Musikanten",
+    coords:[[45.596639, 9.276028], [45.593250, 9.285889]],
+    path:"Sinfonia in verde",
+    color:"green",
+    images:[
+      "https://i.imgur.com/HL2itmo.png",
+      "https://i.imgur.com/da8UhCx.jpeg", 
+      "https://i.imgur.com/ZzbzR4x.png",
+      "https://i.imgur.com/7LgHWxm.png"
+    ],
+    scene:"Il parco dove Marta (Sonia Bergamasco) sta girando una puntata del programma \"Musikanten\" nelle scene iniziali del film è nei pressi delle mura neogotiche del Parco di Monza. Vediamo anche le scene in cui Beethoven (Alejandro Jodorowsky) passeggia immerso nei suoi pensieri, accanto alle rive del Lambro.",
+    plot:"Marta e Nicola, autori televisivi, sperimentano la regressione ipnotica con uno sciamano, permettendo alla donna di rivivere in prima persona il genio e i tormenti di un Ludwig van Beethoven ormai sordo nella Vienna dell'Ottocento. L'immersione artistica nel passato si scontra però con un brusco risveglio nel presente, dove i protagonisti assistono impotenti all'ascesa di un inquietante regime autoritario globale.",
+    year:"2005",
+    director:"Franco Battiato"
+  },
+  {
+    title:"Veloce come il vento",
+    coords:[[45.618611, 9.281111]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/Ud7ScDR.jpeg",
+      "https://i.imgur.com/NPLGNl6.png"
+    ],
+    scene:"Diverse riprese, tra cui le scene inziali, sono state fatte all’Autodromo di Monza. Nello specifico, nella prima scena si vede il rettilineo di partenza, esattamente davanti all’area dei box e della pit lane; la ripresa guarda verso la Variante del Rettifilo (la prima curva del circuito), che si trova infondo alla striscia d’asfalto visibile.",
+    plot:"Dopo la morte del padre, la giovane pilota Giulia è costretta a convivere con il fratello Loris, un ex campione di rally tossicodipendente, per tentare di salvare la casa e la custodia del fratellino Nico. Grazie alla guida tecnica di Loris, la ragazza scala le classifiche, ma sarà proprio l'uomo a ottenere il riscatto finale per l'intera famiglia vincendo la pericolosa e clandestina \"Italian Race\".",
+    year:"2016",
+    director:"Matteo Rovere"
+  },
+  {
+    title:"F1",
+    coords:[[45.622472, 9.290222]],
+    path:"Il sentiero della velocità",
+    color:"red",
+    images:[
+      "https://i.imgur.com/FcqtwHj.jpeg",
+      "https://i.imgur.com/svAZoHQ.png"
+    ],
+    scene:"Oltre alle numerose scene durante la gara sul circuito, vediamo prima della gara una scena in cui Sonny (Brad Pitt), Joshua (Damson Idris) e Kate (Kerry Condon) fanno jogging sulla pista.",
+    plot:"Trent'anni dopo un grave incidente, l'ex pilota Sonny Hayes torna in Formula 1 per fare da mentore al giovane talento Joshua Pearce e risollevare le sorti del team APXGP. Grazie a una strategia perfetta nell'ultima gara ad Abu Dhabi, Sonny conquista una storica vittoria che salva la scuderia, decidendo poi di ritirarsi nuovamente per tornare alla sua vita nomade e alle corse minori.",
+    year:"2025",
+    director:"Joseph Kosinski"
+  }
+
+];
+
+const markersByFilm={};
+
+function createFilmCard(film,index){
+let imagesHTML='';
+film.images.forEach(img=>{
+imagesHTML+=`<a href="${img}" class="glightbox" data-gallery="${film.title}">
+<img src="${img}">
+</a>`;
+});
+return `
+<div class="film-card" data-path="${film.path}">
+<h3 onclick="scrollToMapAndFocus(${index},0)">${film.title}</h3>
+<div class="film-images">${imagesHTML}</div>
+<p><strong>Scena e Location:</strong> ${film.scene}</p>
+<p><strong>Trama:</strong> ${film.plot}</p>
+<p><strong>Anno:</strong> ${film.year} – <strong>Regia:</strong> ${film.director}</p>
+</div>`;
+}
+
+document.getElementById('films-container').innerHTML=
+  films.map((f,i)=>createFilmCard(f,i)).join('');
+
+let lightbox = GLightbox({ selector: '.glightbox', loop: true });
+
+map.on('popupopen',function(){
+  setTimeout(() => {
+	lightbox.reload();
+  },50);
+});
+
+films.forEach((film,filmIndex)=>{
+markersByFilm[filmIndex]=[];
+
+film.coords.forEach((coord,coordIndex)=>{
+
+let navHTML='';
+if(film.coords.length>1){
+navHTML=`
+<div class="popup-nav">
+<button onclick="changeLocation(${filmIndex},${coordIndex-1})">⬅</button>
+<button onclick="changeLocation(${filmIndex},${coordIndex+1})">➡</button>
+</div>`;
+}
+
+let popupImages='';
+film.images.forEach(img=>{
+popupImages+=`
+<a href="${img}" class="glightbox" data-gallery="popup-${film.title}">
+<img src="${img}">
+</a>`;
+});
+
+const popupHTML=`
+<div>
+<h3>${film.title}</h3>
+
+<div class="popup-images">
+${popupImages}
+</div>
+
+<p><strong>Scena e Location:</strong> ${film.scene}</p>
+<p><strong>Trama:</strong> ${film.plot}</p>
+<p><strong>Anno:</strong> ${film.year} – <strong>Regia:</strong> ${film.director}</p>
+
+${navHTML}
+</div>`;
+
+const marker=L.circleMarker(coord,{
+color:film.color,
+radius:8,
+fillOpacity:0.8
+}).addTo(map)
+.bindPopup(popupHTML,{
+maxWidth:520,
+autoPan:true,
+autoPanPadding:[80,120]
+});
+
+marker.filmIndex=filmIndex;
+marker.coordIndex=coordIndex;
+marker.path=film.path;
+
+marker.on('click',()=>{
+  focusOnFilm(filmIndex,coordIndex);
+  // Ricarica GLightbox per i link presenti nel popup appena aperto
+  setTimeout(() => {
+    lightbox.reload();
+  }, 50);
+});
+
+markersByFilm[filmIndex].push(marker);
+
+});
+});
+
+function focusOnFilm(filmIndex,coordIndex){
+  const marker=markersByFilm[filmIndex][coordIndex];
+  const latlng=marker.getLatLng();
+
+map.setView(latlng,17,{
+  animate:true,
+  duration:0.8
+});
+
+setTimeout(()=>{
+  marker.openPopup();
+
+GLightbox({
+     selector: `.leaflet-popup a.glightbox`,
+     loop: true
+   });
+},250);
+
+}
+
+function scrollToMapAndFocus(filmIndex, coordIndex) {
+  // Scrolla la pagina fino alla mappa
+  document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Dopo 300ms (tempo dello scroll) fai zoom e apri popup
+  setTimeout(() => {
+    focusOnFilm(filmIndex, coordIndex);
+  }, 300);
+}
+
+function changeLocation(filmIndex,newIndex){
+if(newIndex<0)newIndex=markersByFilm[filmIndex].length-1;
+if(newIndex>=markersByFilm[filmIndex].length)newIndex=0;
+focusOnFilm(filmIndex,newIndex);
+}
+
+function filterPath(path){
+let group=[];
+films.forEach((f,i)=>{
+markersByFilm[i].forEach(m=>{
+if(m.path===path){
+m.addTo(map);
+group.push(m.getLatLng());
+}else{
+map.removeLayer(m);
+}
+});
+});
+document.querySelectorAll('.film-card').forEach(c=>{
+c.style.display=c.dataset.path===path?'block':'none';
+});
+if(group.length){
+map.fitBounds(group,{padding:[80,80]});
+}
+}
+
+function showAllFilms(){
+let group=[];
+films.forEach((f,i)=>{
+markersByFilm[i].forEach(m=>{
+m.addTo(map);
+group.push(m.getLatLng());
+});
+});
+document.querySelectorAll('.film-card').forEach(c=>c.style.display='block');
+map.fitBounds(group,{padding:[80,80]});
+}
+</script>
+
+</body>
+</html>
