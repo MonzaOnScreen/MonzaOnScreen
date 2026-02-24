@@ -152,6 +152,24 @@ font-size:0.9rem;
 }
 
 }
+/* ===== SEZIONE FONTI ===== */
+#fonti {
+  max-width: 900px;       /* Limita la larghezza per migliorare la leggibilità */
+  margin: 40px auto;      /* Spazio sopra e sotto + centratura orizzontale */
+  padding: 20px;          /* Spazio interno per non attaccarsi ai bordi */
+  font-size: 0.9rem;      /* Testo leggermente più piccolo */
+  background: #f7f7f7;    /* Facoltativo: leggero sfondo per distinguere la sezione */
+  border-radius: 12px;    /* Angoli leggermente arrotondati */
+  line-height: 1.6;       /* Migliora la leggibilità */
+}
+
+#fonti h2, #fonti h3 {
+  margin-top: 0;
+}
+
+#fonti ul {
+  padding-left: 20px;     /* Spazio per le voci della lista */
+}
 </style>
 </head>
 
@@ -693,7 +711,25 @@ document.querySelectorAll('.film-card').forEach(c=>c.style.display='block');
 map.fitBounds(group,{padding:[80,80]});
 }
 </script>
+<section id="fonti">
+  <h2>Fonti delle immagini</h2>
 
+  <p>Le immagini presenti in questo prototipo provengono da archivi online, fotogrammi cinematografici e servizi cartografici. Il progetto è realizzato esclusivamente a scopo accademico.</p>
+
+  <h3>Fonti principali utilizzate</h3>
+  <ul>
+    <li>Davinotti.com – location cinematografiche</li>
+    <li>Viaggiare in Brianza</li>
+    <li>YouTube – fotogrammi dei film</li>
+    <li>Google Maps – immagini attuali delle location</li>
+    <li>Golf Club Milano</li>
+    <li>Reggia di Monza</li>
+    <li>Turismo Monza</li>
+    <li>Wonders.it</li>
+    <li>Tripadvisor</li>
+  </ul>
+
+  <p>Tutte le immagini appartengono ai rispettivi proprietari.</p>
+</section>
 </body>
 </html>
-
