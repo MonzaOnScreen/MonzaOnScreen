@@ -638,7 +638,7 @@ document.getElementById('films-container').innerHTML=
 
 let lightbox = GLightbox({ selector: '.glightbox', loop: true });
 
-map.on('popupopen',function(e){
+map.on('popupopen', function(e){
 
   setTimeout(() => {
     lightbox.reload();
@@ -649,12 +649,14 @@ map.on('popupopen',function(e){
 
     const popupEl = e.popup.getElement();
 
-    popupEl.addEventListener('touchstart', function(ev){
-      ev.stopPropagation();
+    // Quando tocchi il popup → disattiva il drag della mappa
+    popupEl.addEventListener('touchstart', function(){
+      map.dragging.disable();
     });
 
-    popupEl.addEventListener('touchmove', function(ev){
-      map.dragging._draggable._onMove(ev);
+    // Quando togli il dito → riattiva il drag
+    popupEl.addEventListener('touchend', function(){
+      map.dragging.enable();
     });
 
   }
