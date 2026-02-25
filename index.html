@@ -163,18 +163,20 @@ border-radius:8px;
 }
 
 .leaflet-popup-content{
-margin:8px;
-font-size:0.9rem;
-max-height:60vh;
+margin:6px;
+font-size:0.85rem;
+max-height:45vh;
 overflow-y:auto;
+-webkit-overflow-scrolling:touch;
 }
 
 .leaflet-popup-content-wrapper{
-max-width:95vw;
+max-width:88vw;
+border-radius:14px;
 }
 
 .leaflet-popup{
-max-width:95vw !important;
+max-width:88vw !important;
 }
 
 }
@@ -636,10 +638,27 @@ document.getElementById('films-container').innerHTML=
 
 let lightbox = GLightbox({ selector: '.glightbox', loop: true });
 
-map.on('popupopen',function(){
+map.on('popupopen',function(e){
+
   setTimeout(() => {
-	lightbox.reload();
+    lightbox.reload();
   },50);
+
+  // SOLO MOBILE
+  if (window.innerWidth < 768) {
+
+    const popupEl = e.popup.getElement();
+
+    popupEl.addEventListener('touchstart', function(ev){
+      ev.stopPropagation();
+    });
+
+    popupEl.addEventListener('touchmove', function(ev){
+      map.dragging._draggable._onMove(ev);
+    });
+
+  }
+
 });
 
 films.forEach((film,filmIndex)=>{
