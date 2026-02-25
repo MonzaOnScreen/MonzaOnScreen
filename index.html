@@ -170,6 +170,44 @@ font-size:0.9rem;
 #fonti ul {
   padding-left: 20px;     /* Spazio per le voci della lista */
 }
+/* Stile per il tasto Italy for Movies centrato dopo le fonti */
+.footer-link-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #fdfaf7; /* Colore sfondo uguale al resto del sito */
+}
+
+.btn-ifm {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #154b7c; /* Il blu del tuo header */
+    color: #ffffff !important;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-ifm:hover {
+    background-color: #1a1a2e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.footer-link-wrapper p {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
 </style>
 </head>
 
@@ -711,6 +749,7 @@ document.querySelectorAll('.film-card').forEach(c=>c.style.display='block');
 map.fitBounds(group,{padding:[80,80]});
 }
 </script>
+
 <section id="fonti">
   <h2>Fonti delle immagini</h2>
 
@@ -730,6 +769,12 @@ map.fitBounds(group,{padding:[80,80]});
   </ul>
 
   <p>Tutte le immagini appartengono ai rispettivi proprietari.</p>
-</section>
+</section> <div class="footer-link-wrapper">
+    <p>Per approfondire le location nazionali</p>
+    <a href="https://www.italyformovies.it" target="_blank" class="btn-ifm">
+        Esplora su Italy for Movies
+    </a>
+</div>
+
 </body>
 </html>
