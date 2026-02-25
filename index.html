@@ -125,8 +125,11 @@ border-radius:18px;
 }
 
 .film-card{
-width:94%;
+width:88%;
 padding:16px;
+margin:20px auto;
+border-radius:18px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
 .film-card h3{
@@ -134,12 +137,15 @@ font-size:1.2rem;
 }
 
 .film-images{
-flex-direction:column;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 
 .film-images img{
 width:100%;
-height:auto;
+height:110px;
+object-fit:cover;
 }
 
 .popup-images{
@@ -149,6 +155,16 @@ grid-template-columns:1fr;
 .leaflet-popup-content{
 margin:8px;
 font-size:0.9rem;
+max-height:60vh;
+overflow-y:auto;
+}
+
+.leaflet-popup-content-wrapper{
+max-width:95vw;
+}
+
+.leaflet-popup{
+max-width:95vw !important;
 }
 
 }
@@ -546,9 +562,9 @@ const films = [
     color:"green",
     images:[
       "https://i.imgur.com/HL2itmo.png",
-      "https://i.imgur.com/7LgHWxm.png", 
+      "https://i.imgur.com/da8UhCx.jpeg", 
       "https://i.imgur.com/ZzbzR4x.png",
-      "https://i.imgur.com/da8UhCx.jpeg"
+      "https://i.imgur.com/7LgHWxm.png"
     ],
     scene:"Il parco dove Marta (Sonia Bergamasco) sta girando una puntata del programma \"Musikanten\" nelle scene iniziali del film è nei pressi delle mura neogotiche del Parco di Monza. Vediamo anche le scene in cui Beethoven (Alejandro Jodorowsky) passeggia immerso nei suoi pensieri, accanto alle rive del Lambro.",
     plot:"Marta e Nicola, autori televisivi, sperimentano la regressione ipnotica con uno sciamano, permettendo alla donna di rivivere in prima persona il genio e i tormenti di un Ludwig van Beethoven ormai sordo nella Vienna dell'Ottocento. L'immersione artistica nel passato si scontra però con un brusco risveglio nel presente, dove i protagonisti assistono impotenti all'ascesa di un inquietante regime autoritario globale.",
@@ -778,4 +794,3 @@ map.fitBounds(group,{padding:[80,80]});
 
 </body>
 </html>
-
